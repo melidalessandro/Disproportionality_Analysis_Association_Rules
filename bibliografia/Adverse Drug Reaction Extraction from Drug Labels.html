@@ -1,0 +1,684 @@
+
+<html>
+  <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="./mss.css"/>
+    <title>Adverse Drug Reaction Extraction from Drug Labels</title>
+  </head>
+  <body>
+    <div align="center">
+      <h1><a href="https://tac.nist.gov/2017/">TAC 2017</a></h1>
+      <h2>Adverse Drug Reaction Extraction from Drug Labels</h2>
+    </div>
+
+<div style="display:float;background-color:#F0FFFF;width:250px;height:50px;border-style:solid;border-color:#6495ED;padding:10px;z-index:10;position:absolute;right:10;top:10;">
+<center><b>Data Download</b><br>
+<a href="train_xml.tar.gz">Training set</a> <br>
+Test set coming in November 2017.  </center>
+</div>
+    <p>
+      Drug labels (prescribing information or package inserts) describe what
+      a particular medicine is supposed to do, who should or should not take
+      it, how to use it, and specific safety concerns.
+      The US Food and Drug Administration (FDA) publishes regulations
+      governing the content and format of this information to provide
+      recommendations for applicants developing labeling for new drugs and
+      revising labeling for already approved drugs.
+      One of the major aspects of drug information are safety concerns in the
+      form of Adverse Drug Reactions (ADRs).
+      In this evaluation, we are focusing on extraction of ADRs from the
+      prescription drug labels.
+    </p>
+     
+    <p> 
+      FDA guidelines for applicants define ADRs as follows:
+    </p>
+    <p style="margin-left: 40px">
+      <strong>Adverse Event</strong>:
+      refers to any untoward medical event associated with the use of a drug in
+      humans, whether or not considered drug-related.
+    </p>
+    <p style="margin-left: 40px">
+      <strong>Adverse Reaction</strong>:
+      an undesirable effect reasonably associated with the use of a drug, that
+      may occur as part of the pharmacological action of the drug or may be
+      unpredictable in its occurrence.
+      This definition does not include all adverse events observed during use of
+      a drug, only those for which there is some basis to believe there is a
+      causal relationship between the drug and the occurrence of the adverse
+      event.
+      Adverse reactions may include signs and symptoms, changes in laboratory
+      parameters, and changes in other measures of critical body function, such
+      as vital signs and ECG.
+    </p>
+    <p style="margin-left: 40px">
+      <strong>Serious Adverse Reaction</strong>:
+      refers to any reaction occurring at any dose that results in any of the
+      following outcomes: death, a life-threatening adverse experience,
+      inpatient hospitalization or prolongation of existing hospitalization, a
+      persistent or significant disability or incapacity, or a congenital
+      anomaly or birth defect.
+    </p>
+    <p style="margin-left: 40px">
+      Sources:<br>
+      <a href="http://www.fda.gov/downloads/Drugs/GuidanceComplianceRegulatoryInformation/Guidances/ucm075057.pdf">http://www.fda.gov/downloads/Drugs/GuidanceComplianceRegulatoryInformation/Guidances/ucm075057.pdf</a>
+      <br>
+      <a href="https://www.fda.gov/downloads/Drugs/Guidances/ucm075096.pdf">https://www.fda.gov/downloads/Drugs/Guidances/ucm075096.pdf</a>
+    </p>
+    <p>
+      The FDA is highly interested in automatic extraction of ADRs from drug
+      labels for many purposes.
+      Two possible applications enabled by this task are:
+      (1) comparing the ADRs present in labels from different manufacturers for
+      the same drug, and
+      (2) performing post-marketing safety analysis (pharmacovigilance) by
+      identifying new ADRs not currently present in the labels.
+    </p>
+    <p>
+      <!--Specifically for the purposes of post-marketing safety analysis, the FDA
+      relies on spontaneous adverse event reports submitted to the FDA Adverse
+      Event Reporting System (FAERS).
+      To detect novel ADRs more efficiently and operationalize
+      pharmacovigilance, the current approach to FAERS case report review
+      requires the manual reading the text of a drug label to determine if a
+      given event is already noted (i.e. is a "labeled" event), extraction of
+      the labeled events needs to be automated.-->
+      Specifically for the purposes of post-marketing safety analysis, the FDA
+      relies on spontaneous adverse event reports submitted to the FDA Adverse
+      Event Reporting System (FAERS).
+      To detect previously unknown ADRs, the current approach to FAERS case
+      report review requires manually reading the text of a drug label to
+      determine if a reported ARD is already noted in the label.
+      To improve the efficiency of this process, the extraction of the ADRs from
+      the drug labels needs to be automated.
+    </p>
+    <p>
+      The results of this track will inform future FDA efforts at automating
+      important safety processes, and could potentially lead to future FDA
+      collaboration with interested researchers in this area.
+    </p>
+
+    <h2><font color="#000099">Objective</font></h2>
+    <p>
+      The purpose of this TAC track is to test various natural language
+      processing (NLP) approaches for their information extraction (IE)
+      performance on adverse reactions found in structured product labels
+      (SPLs, or simply "labels").
+      A large set of labels will be provided to participants, of which 101 will
+      be annotated with adverse reactions.
+      Additionally, the training labels will be accompanied by the MedDRA
+      Preferred Terms (PT) and Lower Level Terms (LLT) of the ADRs in the drug
+      labels.
+      This corresponds to the primary goal 
+      of the task: to identify the known ADRs in a SPL in the form of MedDRA
+      concepts.
+      Participants will be evaluated by their performance on a held-out set of
+      labeled SPLs.
+    </p>
+
+    <h2><font color="#000099">Overview</font></h2>
+    <p>
+      The participants will be provided with over one thousand drug labels
+      as text documents in an XML format.
+      Of these, 101 drug labels will form the official training set and contain
+      gold standard annotations created by NLM and FDA.
+    </p>
+    <p>
+      <strong><u>Mention Annotations</u></strong>
+    </p>
+    <p>
+      The gold standard contains the following mention-style annotations:
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>AdverseReaction</b></font>:
+      Reported ADRs that can be associated with use of the drug or any of its
+      components, following the definitions provided above.
+      This may include signs and symptoms, worsening medical conditions, changes
+      in laboratory parameters, and changes in other measures of critical body
+      function, such as vital signs and ECG results.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Severity</b></font>:
+      Measurement of the severity of a specific
+      <font color="0000ff">AdverseReaction</font>.
+      This can be qualitative terms (e.g., "<i>major</i>", "<i>critical</i>",
+      "<i>serious</i>", "<i>life-threatening</i>") or quantitative grades
+      (e.g., "<i>grade 1</i>", "<i>Grade 3-4</i>",
+      "<i>3 times upper limit of normal (ULN)</i>", "<i>240 mg/dL</i>").
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>DrugClass</b></font>:
+      The class of drug that the specific drug belongs to.
+      This is designed to capture drug class effects (e.g.,
+      "[<i>beta blockers</i>]<sub><font color="0000ff">DrugClass</font></sub>
+      <i>may result in...</i>") that are not necessarily specific to the
+      particular drug.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Negation</b></font>:
+      Trigger word for event negation.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Animal</b></font>:
+      Animal species in which an <font color="0000ff">AdverseReaction</font>
+      was observed.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Factor</b></font>:
+      Any additional aspect of an <font color="0000ff">AdverseReaction</font>
+      that is not covered by one of the other mentions listed here.
+      Notably, this includes hedging terms (e.g., may, risk, potential),
+      references to the placebo arm of a clinical trial, or specific
+      sub-populations (e.g., pregnancy, fetus).
+    </p>
+    <p>
+      <strong>Note: Other than <font color="0000ff">AdverseReaction</font>s,
+      mentions are only annotated when related to an
+      <font color="0000ff">AdverseReaction</font> by one of the following
+      relations.</strong>
+      When an animal, drug class, negation, etc. is not associated with an
+      <font color="0000ff">AdverseReaction</font>, it is not annotated.
+    </p>
+    <p>
+      <strong><u>Relation Annotations</u></strong>
+    </p>
+    <p>
+      The following relations connect an
+      <font color="0000ff">AdverseReaction</font> with one of the above
+      mentions.
+      Each relation is limited to a specific subset of mention types.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Negated</b></font>:
+      A <font color="0000ff">Negation</font> or
+      <font color="0000ff">Factor</font> that negates an
+      <font color="0000ff">AdverseReaction</font> for the drug.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Hypothetical</b></font>:
+      An <font color="0000ff">Animal</font>,
+      <font color="0000ff">DrugClass</font>, or
+      <font color="0000ff">Factor</font> that speculates about, or qualifies the
+      definitiveness of the drug's relationship with an
+      <font color="0000ff">AdverseReaction</font>.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="0000ff"><b>Effect</b></font>:
+      A <font color="0000ff">Severity</font> of an
+      <font color="0000ff">AdverseReaction</font> for the drug.
+    </p>
+    <!--<p>
+      <font color="0000ff">Equiv</font>: Alternative name or acronym for an
+      event (between two <font color="0000ff">AdverseReaction</font>s).
+      For the most part, this is only annotated when the equivalent name is used
+      in the same sentence as the <font color="0000ff">AdverseReaction</font>.
+      The exception is if the equivalent name is mentioned in one sentence and
+      then defined in the next.
+    </p>-->
+    <p>
+      <strong><u>Reaction Annotations</u></strong>
+    </p>
+    <p>
+      The ultimate aim is to know which ADRs are in the labels, not the precise
+      offsets or relations, such that the ADRs may be linked to a structured
+      knowledge source (MedDRA).
+      Further, an ADR mentioned several times should not necessarily carry more
+      weight than an ADR mentioned once.
+      As such, the gold standard contains a list of unique ADRs aggregated at
+      the document level (by string).
+      These strings are then annotated with MedDRA Lower Level Terms (LLT) and
+      the corresponding Preferred Term (PT).
+    </p>
+
+    <p>
+      The exact XML format is specified below, but first an introduction to the
+      tasks will be provided, since this gives some context to the formatting
+      choices.
+    </p>
+
+    <p>
+      Additional details regarding the annotation process can be found in the
+      <a href="./AnnotationGuidelines_TAC2017ADR.pdf">Annotation Guidelines</a>
+      provided to the annotators.
+    </p>
+
+    <h2><font color="#000099">Tasks</font></h2>
+    <p>
+      The participants may choose any one specific task described below or approach the tasks 
+      as each one building upon the previous tasks. Some tasks do necessarily require the output of previous 
+      tasks, e.g., Task 2 requires Task 1, but Task 3 can be performed independently.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="cc3300"><b>Task 1</b></font>:
+      Extract <font color="0000ff">AdverseReaction</font>s and related mentions
+      (<font color="0000ff">Severity</font>,
+      <font color="0000ff">Factor</font>,
+      <font color="0000ff">DrugClass</font>,
+      <font color="0000ff">Negation</font>,
+      <font color="0000ff">Animal</font>).
+      This is similar to many NLP Named Entity Recognition (NER) evaluations.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="cc3300"><b>Task 2</b></font>:
+      Identify the relations between
+      <font color="0000ff">AdverseReaction</font>s and related mentions
+      (i.e., <font color="0000ff">Negated</font>,
+      <font color="0000ff">Hypothetical</font>,
+      and <font color="0000ff">Effect</font><!--, and Equiv-->).
+      This is similar to many NLP relation identification evaluations.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="cc3300"><b>Task 3</b></font>:
+      Identify the positive <font color="0000ff">AdverseReaction</font> mention
+      names in the labels.
+      For the purposes of this task, positive will be defined as the caseless
+      strings of all the <font color="0000ff">AdverseReaction</font>s that have
+      not been negated and are not related by a
+      <font color="0000ff">Hypothetical</font> relation to a
+      <font color="0000ff">DrugClass</font> or
+      <font color="0000ff">Animal</font>.
+      Note that this means <font color="0000ff">Factor</font>s related via a
+      <font color="0000ff">Hypothetical</font> relation are considered positive
+      (e.g., "[<i>unknown risk</i>]<sub><font color="0000ff">Factor</font></sub>
+      <i>of</i>
+      [<i>stroke</i>]<sub><font color="0000ff">AdverseReaction</font></sub>")
+      for the purposes of this task.
+      The result of this task will be a list of unique strings corresponding to
+      the positive ADRs as they were written in the label.
+    </p>
+    <p style="margin-left: 40px">
+      <font color="cc3300"><b>Task 4</b></font>:
+      Provide MedDRA PT(s) and LLT(s) for each positive
+      <font color="0000ff">AdverseReaction</font> (occassionally, two or more
+      PTs are necessary to fully describe the reaction).
+      For participants approaching the tasks sequentially, this can be viewed as
+      normalization of the terms extracted in Task 3 to MedDRA LLTs/PTs.
+      Because MedDRA is not publicly available, and contains several versions, a
+      standard version of MedDRA v18.1 will be provided to the participants.
+      Other resources such as the
+      <a href="https://uts.nlm.nih.gov/">UMLS Terminology Services</a> may be
+      used to aid with the normalization process.
+    </p>
+      <!--<ul><ul>
+      <li> The organizers will send the list of participants and a primary point of contact (POC) from each participant to 
+      MedDRA Maintenance and Support Services Organization (MSSCO).</li>
+      <li>MSSO will send a message stating that the MedDRA v18.1 will only be used for the NIST evaluation of extraction of adverse reactions 
+      from drug labels and will not be used outside of the project to the POC</li>
+      <li>For participants that are not MedDRA subscribers, MSSCO will ask the POCs to send an email with the above message as their consent 
+      to the condition of use.</li>
+      <li>Upon receiving the consent, MSSCO will send the POC a copy of MedDRA v18.1.</li>
+      </ul></ul>-->
+    </p>
+
+    <h2><font color="#000099">Data Format</font></h2>
+    <p>
+      The data is provided in an XML format.
+      What follows is the XML for the drug Choline:
+    </p>
+    <table width="60%" border="1" cellpadding="2" cellspacing="2">
+    <tr>
+    <td>
+    <pre>
+      <font color="00ccff">&lt;?xml</font> <font color="cc0066">version="1.0" encoding="UTF-8"</font><font color="00ccff">?&gt;</font>
+      <font color="00ccff">&lt;Label</font> <font color="cc0066">drug="choline" track="TAC2017_ADR"</font><font color="00ccff">&gt;</font>
+        <font color="00ccff">&lt;Text&gt;</font>
+          <font color="00ccff">&lt;Section</font> <font color="cc0066">name="adverse reactions" id="S1"</font><font color="00ccff">&gt;</font>6            ADVERSE REACTIONS  
+      
+        Exclusive of an uncommon, mild injection site reaction, no adverse reactions to  11  C-choline have been reported.
+      
+      
+      
+         EXCERPT:   Exclusive of an uncommon, mild injection site reaction, no other adverse reactions have been reported (  6  ).
+      
+      
+      
+         To report SUSPECTED ADVERSE REACTIONS, contact Division of Nuclear Medicine, Department of Radiology, Mayo Clinic at 507-284-2511 or FDA at 1-800-FDA-1088 or www.fda.gov/medwatch<font color="00ccff">&lt;/Section&gt;</font>
+          <font color="00ccff">&lt;Section</font> <font color="cc0066">name="warnings and precautions" id="S2"</font><font color="00ccff">&gt;</font>5          WARNINGS AND PRECAUTIONS  
+      
+      
+      
+         EXCERPT:    *  Imaging errors have been reported; blood PSA levels &lt; 2 ng/mL have been associated with poor imaging performance (  5.1  ). 
+       *  Allergic reactions: have emergency resuscitation equipment and personnel readily available (  5.2  ). 
+       *  Radiation risk: Choline C 11 Injection contributes to a patient's long-term cumulative radiation exposure. Ensure safe handling to protect the patient and health care worker (  5.3  ). 
+          
+       
+      
+          5.1             Imaging   Errors  
+      
+      
+      
+        Imaging errors have been reported with  11  C-choline PET and PET/CT imaging. A negative image does not rule out the presence of recurrent prostate cancer and a positive image does not confirm the presence of recurrent cancer.  11  C-choline uptake is not specific for prostate cancer and may occur with other types of cancer (such as lung carcinoma and brain tumors). Clinical correlation, including histopathological evaluation of the suspected recurrence site, is essential to proper use of the PET imaging information.
+      
+      
+      
+       *  Blood PSA levels &lt; 2 ng/mL have been associated with poor performance of  11  C-choline PET imaging (higher numbers of false positive and false negative results) [ see Clinical Studies (14) ]. 
+       *  Tissue inflammation as well as prostatic hyperplasia have been associated with false positive  11  C-choline PET images. 
+       *  Concomitant colchicine or androgen-deprivation therapeutic drugs (such as luteinizing hormone-releasing analogs and anti-androgen drugs) may interfere with  11  C-choline PET imaging. One published report of  18  F-methylcholine PET imaging indicated that discontinuation of colchicine for two weeks resolved the colchicine effect. The impact of discontinuation of androgen-deprivation therapy upon  11  C-choline PET imaging has not been established [ see Drug Interactions   (7) ]. 
+              5.2             Allergic Reactions  
+       
+      
+        As with any injectable drug product, allergic reactions and anaphylaxis may occur. Emergency resuscitation equipment and personnel should be immediately available.
+      
+      
+      
+           5.3             Radiation Risks  
+      
+      
+      
+        Choline C 11 Injection contributes to a patient's overall long-term cumulative radiation exposure. Long-term cumulative radiation exposure is associated with an increased risk for cancer. Safe handling should be ensured to minimize radiation exposure to the patient and health care workers [ see    Dosage and Administration   (   2.   1   )  ].<font color="00ccff">&lt;/Section&gt;</font>
+        <font color="00ccff">&lt;/Text&gt;</font>
+        <font color="00ccff">&lt;Mentions&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M1" section="S1" type="Severity" start="68" len="4" str="mild"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M2" section="S1" type="AdverseReaction" start="73" len="23" str="injection site reaction"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M3" section="S1" type="Severity" start="200" len="4" str="mild"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M4" section="S1" type="AdverseReaction" start="205" len="23" str="injection site reaction"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M5" section="S2" type="AdverseReaction" start="193" len="18" str="Allergic reactions"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M6" section="S2" type="AdverseReaction" start="300" len="14" str="Radiation risk"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M7" section="S2" type="AdverseReaction" start="1964" len="18" str="allergic reactions"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M8" section="S2" type="AdverseReaction" start="1987" len="11" str="anaphylaxis"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M9" section="S2" type="Factor" start="1999" len="3" str="may"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M10" section="S2" type="Factor" start="2309" len="4" str="risk"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Mention</font> <font color="cc0066">id="M11" section="S2" type="AdverseReaction" start="2318" len="6" str="cancer"</font> <font color="00ccff">/&gt;</font>
+        <font color="00ccff">&lt;/Mentions&gt;</font>
+        <font color="00ccff">&lt;Relations&gt;</font>
+          <font color="00ccff">&lt;Relation</font> <font color="cc0066">id="R1" type="Effect" arg1="M2" arg2="M1"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Relation</font> <font color="cc0066">id="R2" type="Effect" arg1="M4" arg2="M3"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Relation</font> <font color="cc0066">id="R3" type="Hypothetical" arg1="M7" arg2="M9"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Relation</font> <font color="cc0066">id="R4" type="Hypothetical" arg1="M8" arg2="M9"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;Relation</font> <font color="cc0066">id="R5" type="Hypothetical" arg1="M11" arg2="M10"</font> <font color="00ccff">/&gt;</font>
+        <font color="00ccff">&lt;/Relations&gt;</font>
+        <font color="00ccff">&lt;Reactions&gt;</font>
+          <font color="00ccff">&lt;Reaction</font> <font color="cc0066">id="R1" str="injection site reaction"</font><font color="00ccff">&gt;</font>
+            <font color="00ccff">&lt;Normalization</font> <font color="cc0066">id="R1.N1" meddra_pt="Injection site reaction" meddra_pt_id="10022095"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;/Reaction&gt;</font>
+          <font color="00ccff">&lt;Reaction</font> <font color="cc0066">id="R2" str="allergic reactions"</font><font color="00ccff">&gt;</font>
+            <font color="00ccff">&lt;Normalization</font> <font color="cc0066">id="R2.N1" meddra_pt="Hypersensitivity" meddra_pt_id="10020751" meddra_llt="Allergic reaction" meddra_llt_id="10001718"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;/Reaction&gt;</font>
+          <font color="00ccff">&lt;Reaction</font> <font color="cc0066">id="R3" str="anaphylaxis"</font><font color="00ccff">&gt;</font>
+            <font color="00ccff">&lt;Normalization</font> <font color="cc0066">id="R3.N1" meddra_pt="Anaphylactic reaction" meddra_pt_id="10002198" meddra_llt="Anaphylaxis" meddra_llt_id="10002218"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;/Reaction&gt;</font>
+          <font color="00ccff">&lt;Reaction</font> <font color="cc0066">id="R4" str="cancer"</font><font color="00ccff">&gt;</font>
+            <font color="00ccff">&lt;Normalization</font> <font color="cc0066">id="R4.N1" meddra_pt="Neoplasm malignant" meddra_pt_id="10028997" meddra_llt="Cancer" meddra_llt_id="10007050"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;/Reaction&gt;</font>
+          <font color="00ccff">&lt;Reaction</font> <font color="cc0066">id="R5" str="radiation risk"</font><font color="00ccff">&gt;</font>
+            <font color="00ccff">&lt;Normalization</font> <font color="cc0066">id="R5.N1" meddra_pt="Exposure to radiation" meddra_pt_id="10073306"</font> <font color="00ccff">/&gt;</font>
+          <font color="00ccff">&lt;/Reaction&gt;</font>
+        <font color="00ccff">&lt;/Reactions&gt;</font>
+      <font color="00ccff">&lt;/Label&gt;</font>
+    </pre>
+    </td>
+    </tr>
+    </table>
+
+    <p>
+      The <font color="00ccff">&lt;Text&gt;</font> element contains one or more
+      <font color="00ccff">&lt;Section&gt;</font> elements, corresponding to the
+      sections of interest in the drug labels as defined by the FDA (the three
+      sections of interest are "Adverse Reactions", "Warnings and Precautions",
+      and "Boxed Warnings").
+      Within each <font color="00ccff">&lt;Section&gt;</font> is the text of
+      that section as extracted from the DailyMed label XML.
+      Note that the XML extraction is not perfect.
+      In addition to the obvious whitespace issues seen above, there are also
+      merged words, more information about which will be provided.
+    </p>
+
+    <p>
+      The <font color="00ccff">&lt;Mentions&gt;</font> element contains all the
+      mention annotations, corresponding to <font color="cc3300">Task 1</font>.
+      Each <font color="00ccff">&lt;Mention&gt;</font> has an
+      <font color="cc0066">id</font>; a <font color="cc0066">section</font> that
+      indicates which of the <font color="00ccff">&lt;Section&gt;</font>
+      elements the text can be found in; a <font color="cc0066">type</font>;
+      a <font color="cc0066">start</font> offset as well as character
+      <font color="cc0066">len</font> that correspond to the
+      <font color="00ccff">&lt;Section&gt;</font> it is in; and a
+      <font color="cc0066">str</font> value for readability and for sanity
+      checking offsets.
+      When generating the XML output for <font color="cc3300">Task 1</font>, the
+      <font color="cc0066">section</font>,
+      <font color="cc0066">type</font>,
+      <font color="cc0066">start</font>, and
+      <font color="cc0066">len</font> will all be evaluated.
+      The <font color="cc0066">id</font> can be anything, but will be necessary
+      for <font color="cc3300">Task 2</font>.
+      The <font color="cc0066">str</font> is not necessary and will be ignored.
+    </p>
+
+    <p>
+      The <font color="00ccff">&lt;Relations&gt;</font> element contains all the
+      relation annotations, corresponding to <font color="cc3300">Task 2</font>.
+      Each <font color="00ccff">&lt;Relation&gt;</font> has an
+      <font color="cc0066">id</font>; 
+      a <font color="cc0066">type</font>; and an
+      <font color="cc0066">arg1</font> and <font color="cc0066">arg2</font>
+      that correspond to the <font color="00ccff">&lt;Mention&gt;</font> id.
+      Relations can only exist between mentions in the same section.
+      When generating the XML output for <font color="cc3300">Task 2</font>, the
+      <font color="cc0066">type</font>,
+      <font color="cc0066">arg1</font>, and
+      <font color="cc0066">arg2</font> will all be evaluated.
+      Again, the identifiers can be anything, but they must correspond to a
+      correct <font color="00ccff">&lt;Mention&gt;</font> (as defined above).
+    </p>
+
+    <p>
+      The <font color="00ccff">&lt;Reactions&gt;</font> element contains the
+      unique adverse reactions, corresponding to
+      <font color="cc3300">Tasks 3 and 4</font>.
+      Each <font color="00ccff">&lt;Reaction&gt;</font> has an
+      <font color="cc0066">id</font> and a <font color="cc0066">str</font>
+      value.
+      There is only one <font color="00ccff">&lt;Reaction&gt;</font> for each
+      case-insensitive <font color="0000ff">AdverseReaction</font> in the label.
+      This is the focus of <font color="cc3300">Task 3</font>.
+      Each <font color="00ccff">&lt;Reaction&gt;</font> has at least one
+      <font color="00ccff">&lt;Normalization&gt;</font>, which corresponds to
+      an entry in MedDRA 18.1.
+      This is the focus of <font color="cc3300">Task 4</font>.
+      Each <font color="00ccff">&lt;Normalization&gt;</font> has one required
+      and up to five optional attributes.
+      The only required attribute is the <font color="cc0066">id</font>, which
+      is not evaluated.
+      The five optional attributes are <font color="cc0066">meddra_pt</font>,
+      <font color="cc0066">meddra_pt_id</font>,
+      <font color="cc0066">meddra_llt</font>,
+      <font color="cc0066">meddra_llt_id</font>, and
+      <font color="cc0066">flag</font>.
+      The <font color="cc0066">meddra_pt</font> and
+      <font color="cc0066">meddra_pt_id</font> indicate the MedDRA Preferred
+      Term ("PT").
+      The <font color="cc0066">meddra_llt</font> and
+      <font color="cc0066">meddra_llt_id</font> indicate the MedDRA Lowest Level
+      Term ("LLT"), which uniquely maps to a single MedDRA PT.
+      See the <a href="http://www.meddra.org/how-to-use/basics/hierarchy">MedDRA
+      website</a> for more details on the MedDRA hierarchy.
+      Finally, the <font color="cc0066">flag</font> indicates special situations
+      where there is not an ideal mapping to a PT:
+      "underspecified" means the reaction is too specific to map;
+      "HLGT" means the reaction maps to a MedDRA High Level Group Term;
+      "HLT" means the reaction maps to a High Level Term; and
+      "unmapped" means there is no MedDRA mapping at all.
+      The "underspecified" reactions will be normalized to a PT (e.g.,
+      "<i>hyperpigmentation on the palms</i>" is normalized to the PT
+      "Skin hyperpigmentation").
+      The "HLGT" reactions (e.g. "<i>vision disorders</i>") and "HLT" reactions
+      (e.g., "<i>taste disorder</i>") will be normalized to the corresponding
+      term, with the HLT/HLGT and its ID used in place of the
+      <font color="cc0066">meddra_pt</font> and
+      <font color="cc0066">meddra_pt_id</font> in the XML.
+      The "unmapped" reactions, however, will have no
+      <font color="cc0066">meddra_pt</font>,
+      <font color="cc0066">meddra_pt_id</font>,
+      <font color="cc0066">meddra_llt</font>, or
+      <font color="cc0066">meddra_llt_id</font>.
+    </p>
+
+    <h2><font color="#000099">Data Access</font></h2>
+    <p>
+      The following datasets are available for immediate download:
+      <ul>
+        <li><a href="train_xml.tar.gz">train_xml.tar.gz</a> [101 files]</li>
+        <li><a href="unannotated_xml.tar.gz">unannotated_xml.tar.gz</a>
+            [2208 files]</li>
+      </ul>
+      The <b>train_xml.tar.gz</b> file contains the training data in the above
+      format, while the <b>unannotated_xml.tar.gz</b> file contains a set of
+      2.2k labels in the above format without any
+      <font color="00ccff">&lt;Mention&gt;</font>,
+      <font color="00ccff">&lt;Relation&gt;</font>, or
+      <font color="00ccff">&lt;Reaction&gt;</font> elements (i.e., without the
+      gold-standard annotations).
+    </p>
+
+    <p>
+      Combined, these represent a significant core study set of labels of
+      interest to the FDA.
+      In reality, there are nearly 100k labels, which includes
+      over-the-counter drugs and similar labels for the same, or nearly the
+      same, drug (each manufacturer produces their own label, and the same
+      manufacturer might produce multiple labels for different dosages and forms
+      of the same drug ingredient).
+      Given that the set of all possible drug labels is finite, and publicly
+      accessible, we have decided to release the test data as part of this set
+      of unannotated data, with one caveat.
+      We will first note, however, that the test data is only a small portion of
+      the unannotated data, so "cheating" will have little value.
+      The caveat is that <i>participants should not utilize any other drug
+      labels when developing their systems</i>.
+      If you intend to use a large set of unannotated labels for manual tasks
+      (e.g., reading labels for increased understanding),
+      unsuperivsed tasks (e.g., building word embeddings or clustering), or
+      semi-supervised tasks (e.g., self-training), then <i>all of those
+      activities should be performed on the provided set of unannotated
+      labels</i> (as well as the training data, where appropriate).
+      This will allow for better system comparison, as all approaches
+      incorporating unannotated data will be working on the same set of data.
+    </p>
+
+    <!-- HERE -->
+    <h2><font color="#000099">Evaluation</font></h2>
+
+    <p>
+      The evaluation measures are:
+    </p>
+
+    <table width="60%" border="1" cellpadding="2" cellspacing="2">
+      <tr>
+        <td style="width:59px;"><strong>Task 1</strong></td>
+        <td style="width:559px;">
+            Precision/Recall/F1-measure on mention-level annotations, with and without mention types.<br>
+            <u>Primary Metric</u>: micro-averaged F1.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:59px;"><strong>Task 2</strong></td>
+        <td style="width:559px;">
+            Precision/Recall/F1-measure on relations, with and without relation types.<br>
+            <u>Primary Metric</u>: micro-averaged F1.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:59px;"><strong>Task 3</strong></td>
+        <td style="width:559px;">
+            Precision/Recall/F1-measure on unique positive <font color="0000ff">AdverseReaction</font> strings.<br>
+            <u>Primary Metric</u>: macro-averaged F1 (by label).
+        </td>
+      </tr>
+      <tr>
+        <td style="width:59px;"><strong>Task 4</strong></td>
+        <td style="width:559px;">
+            Precision/Recall/F1-measure on unique MedDRA LLTs and PTs.<br>
+            <u>Primary Metric</u>: macro-averaged F1 of PTs (by label).
+        </td>
+      </tr>
+    </table>
+
+    <p>
+      The official <a href='evaluate.py'>evaluation script</a> will be used to
+      calculate these scores.
+    </p>
+
+    <h2><font color="#000099">Submission</font></h2>
+    <p>
+      Participants will submit system results on the entire set of unannotated
+      labels.
+      Only the labels within the hidden test set will be used for evaluation.
+      As a result, there is no need for a specific 2-3 days where participants
+      freeze their system, download the test data, run it, then submit, as is
+      typical in NLP tasks.
+      A additional advantage of releasing all the data in an unannotated form
+      is that participants can submit results at any time.
+    </p>
+
+    <p>
+      Participants are allowed <strong>three separate submissions</strong>.
+      Submissions that do not conform to the provided XML standards will be
+      rejected without consideration or notification.
+    </p>
+
+    <h2><font color="#000099">Timeline</font></h2>
+    <table cellpadding="2" cellspacing="2">
+      <tr>
+        <td style="width:120px;"><strong>May 2017</strong></td>
+        <td style="width:498px;">
+          Registration deadline for participants.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>26 September 2017</strong></td>
+        <td style="width:498px;">
+          Participant submissions due.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>Early October 2017</strong></td>
+        <td style="width:498px;">
+          Individual results sent to participants.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>15 October 2017</strong></td>
+        <td style="width:498px;">
+          Short system descriptions <i>and</i> workshop presentation proposals due.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>20 October 2017</strong></td>
+        <td style="width:498px;">
+          Notification of acceptance of workshop presentation proposals.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>1 November 2017</strong></td>
+        <td style="width:498px;">
+          Participant workshop notebook papers due.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>13-14 November 2017</strong></td>
+        <td style="width:498px;">
+          TAC 2017 Workshop in Gaitherburg, MD, USA.
+        </td>
+      </tr>
+      <tr>
+        <td style="width:120px;"><strong>February 2018</strong></td>
+        <td style="width:498px;">
+          Final proceedings papers due.
+        </td>
+      </tr>
+    </table>
+
+    <h2><font color="#000099">Mailing List</font></h2>
+    <p>
+      <a href="https://groups.google.com/forum/#!members/tac-adr">tac-adr@googlegroups.com</a>
+    </p>
+
+    <h2><font color="#000099">Organizers</font></h2>
+    <p>
+      Kirk Roberts (<a href="mailto:kirk.roberts@uth.tmc.edu">kirk.roberts@uth.tmc.edu</a>)<br>
+      Dina Demner-Fushman (<a href="mailto:ddemner@mail.nih.gov">ddemner@mail.nih.gov</a>)<br>
+      Joseph Tonning (<a href="mailto:joseph.tonning@fda.hhs.gov">joseph.tonning@fda.hhs.gov</a>)
+    </p>
+
+</body>
+</html>

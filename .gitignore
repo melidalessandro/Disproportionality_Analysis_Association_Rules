@@ -1,0 +1,7 @@
+
+input/drug_reac.csv
+output/drug_reac_punc_ai.csv
+output/drug_reac_punc.csv
+output/drug_reac_demo_ai.csv
+output/drug_reac_demo.csv
+input/faers_ascii_2020Q1/ASCII/DRUG20Q1.txt
